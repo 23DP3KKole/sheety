@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTabRequest;
+use App\Http\Requests\UpdateTabRequest;
 use App\Models\Tab;
+use App\Queries\CommentQuery;
+use App\Queries\TabQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -10,57 +14,45 @@ class TabController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Tab::query()->with('user:id,name');
+        return response()->json(TabQuery::paginateWithUser($request));
+    }
 
-        if ($search = $request->query('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('artist', 'like', "%{$search}%");
-            });
+    public function show(Request $request, Tab $tab): JsonResponse
+    {
+        $tabData = TabQuery::findWithUser($tab->id);
+
+        if (! $tabData) {
+            return response()->json(['message' => 'Tab not found.'], 404);
         }
 
-        $tabs = $query->latest()->paginate(20);
+        $comments = CommentQuery::forTab($tab->id, $request->user()?->id);
 
-        return response()->json($tabs);
-    }
-
-    public function show(Tab $tab): JsonResponse
-    {
-        $tab->load('user:id,name');
-
-        return response()->json(['tab' => $tab]);
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'artist' => ['required', 'string', 'max:255'],
-            'content' => ['required', 'string'],
+        return response()->json([
+            'tab' => $tabData,
+            'comments' => $comments,
         ]);
+    }
+
+    public function store(StoreTabRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
 
         $tab = $request->user()->tabs()->create($validated);
-        $tab->load('user:id,name');
 
-        return response()->json(['tab' => $tab], 201);
+        $tabData = TabQuery::findWithUser($tab->id);
+
+        return response()->json(['tab' => $tabData], 201);
     }
 
-    public function update(Request $request, Tab $tab): JsonResponse
+    public function update(UpdateTabRequest $request, Tab $tab): JsonResponse
     {
         if ($tab->user_id !== $request->user()->id && ! $request->user()->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        $validated = $request->validate([
-            'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'artist' => ['sometimes', 'required', 'string', 'max:255'],
-            'content' => ['sometimes', 'required', 'string'],
-        ]);
+        $tab->update($request->validated());
 
-        $tab->update($validated);
-        $tab->load('user:id,name');
-
-        return response()->json(['tab' => $tab]);
+        return response()->json(['tab' => TabQuery::findWithUser($tab->id)]);
     }
 
     public function destroy(Request $request, Tab $tab): JsonResponse

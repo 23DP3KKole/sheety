@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import api from '../api/client'
+import TabComments from '../components/TabComments.vue'
 import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
@@ -9,6 +10,7 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const tab = ref(null)
+const comments = ref([])
 const loading = ref(true)
 const isFavorite = ref(false)
 const error = ref('')
@@ -26,6 +28,7 @@ async function load() {
   try {
     const { data } = await api.get(`/tabs/${route.params.id}`)
     tab.value = data.tab
+    comments.value = data.comments ?? []
     if (auth.isAuthenticated) {
       const fav = await api.get('/favorites')
       isFavorite.value = fav.data.favorites.some((t) => t.id === tab.value.id)
@@ -80,6 +83,11 @@ async function removeTab() {
         </div>
       </div>
       <pre class="tab-content">{{ tab.content }}</pre>
+      <TabComments
+        :tab-id="tab.id"
+        :initial-comments="comments"
+        @comments-updated="comments = $event"
+      />
     </article>
   </section>
 </template>

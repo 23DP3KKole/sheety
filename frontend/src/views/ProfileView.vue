@@ -11,13 +11,9 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const [favRes, tabsRes] = await Promise.all([
-      api.get('/favorites'),
-      api.get('/tabs', { params: { search: '' } }),
-    ])
-    favorites.value = favRes.data.favorites
-    const all = tabsRes.data.data ?? tabsRes.data
-    myTabs.value = all.filter((t) => t.user_id === auth.user.id)
+    const { data } = await api.get('/profile')
+    favorites.value = data.favorites
+    myTabs.value = data.my_tabs
   } finally {
     loading.value = false
   }

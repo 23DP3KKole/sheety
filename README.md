@@ -6,6 +6,7 @@ Full-stack guitar tab sharing app with Vue 3 frontend and Laravel 13 API.
 
 - **Frontend:** Vue 3, Vite, Tailwind CSS, Pinia, Vue Router
 - **Backend:** Laravel 13, Sanctum, SQLite
+- **Data access:** SQL `JOIN` queries (see `backend/app/Queries/`) combine related tables for list/detail pages
 
 ## Quick start
 
@@ -48,12 +49,16 @@ App runs at `http://localhost:5173` (proxies `/api` to Laravel).
 | GET    | /api/favorites        | User     | List favorites     |
 | POST   | /api/favorites/:id    | User     | Save favorite      |
 | DELETE | /api/favorites/:id    | User     | Remove favorite    |
+| GET    | /api/tabs/:id/comments | —       | List tab comments  |
+| POST   | /api/tabs/:id/comments | User    | Add comment        |
+| DELETE | /api/comments/:id     | Owner/Admin | Delete comment |
+| POST   | /api/comments/:id/vote | User    | Upvote/downvote    |
 | GET    | /api/admin/users      | Admin    | List users         |
 | DELETE | /api/admin/users/:id  | Admin    | Delete user        |
 | GET    | /api/admin/tabs       | Admin    | List all tabs      |
 
 ## Roles
 
-- **Guest:** search and view tabs
-- **Registered:** upload, edit own tabs, save favorites
+- **Guest:** search and view tabs, read comments
+- **Registered:** upload, edit own tabs, save favorites, comment and vote
 - **Admin:** delete any tab or user

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tab;
+use App\Queries\FavoriteQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -10,13 +11,9 @@ class FavoriteController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $favorites = $request->user()
-            ->favorites()
-            ->with('user:id,name')
-            ->latest('favorites.created_at')
-            ->get();
-
-        return response()->json(['favorites' => $favorites]);
+        return response()->json([
+            'favorites' => FavoriteQuery::tabsForUser($request->user()->id),
+        ]);
     }
 
     public function store(Request $request, Tab $tab): JsonResponse
