@@ -2,14 +2,11 @@
 
 return [
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'https://sheety-mu.vercel.app', // <-- Removed trailing slash
-        'https://sheety-j0cpbrowb-23dp3kkoles-projects.vercel.app'
-    ],
+    'allowed_origins' => [env('FRONTEND_URL')],
 
     'allowed_origins_patterns' => [],
 
@@ -20,4 +17,5 @@ return [
     'max_age' => 0,
 
     'supports_credentials' => true,
+
 ];
