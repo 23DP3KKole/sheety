@@ -1,4 +1,5 @@
 <?php
+
 return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
@@ -6,7 +7,8 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://sheety-mu.vercel.app/'
+        'https://sheety-mu.vercel.app', // <-- Removed trailing slash
+        'https://sheety-j0cpbrowb-23dp3kkoles-projects.vercel.app'
     ],
 
     'allowed_origins_patterns' => [],
